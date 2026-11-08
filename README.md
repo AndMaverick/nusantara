@@ -2,7 +2,7 @@
 
 Most AI infrastructure assumes American defaults. In Indonesian text, money is written Rp 1.500.000 or 1,5 juta or 500 rb, chat is full of abbreviations like gak and bgt, dates use Agustus and Des, and phone numbers appear as 0812, +62 812, or 62812. nusantara normalizes these into clean values before they reach a model, a database, or a report. Standard library only.
 
-It is a companion to [lisan](https://github.com/AndMaverick/lisan), which does the same job for Arabic. If you are building for regional markets and want a second opinion on architecture, you can [start a conversation](https://calendly.com/andmaverick/30min?utm_source=github&utm_medium=repo&utm_campaign=nusantara).
+It is a companion to [lisan](https://github.com/AndMaverick/lisan), which does the same job for Arabic. If you are building for regional markets and want a second opinion on architecture, you can [start a conversation](https://calendly.com/andmaverick?utm_source=github&utm_medium=repo&utm_campaign=nusantara).
 
 ## Use
 
