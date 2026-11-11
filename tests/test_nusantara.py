@@ -16,6 +16,12 @@ class RupiahTests(unittest.TestCase):
         self.assertEqual(parse_rupiah("gajinya 12 jt per bulan"), 12000000)
         self.assertEqual(parse_rupiah("250rb"), 250000)
 
+    def test_parse_decimal_units_exactly(self):
+        self.assertEqual(parse_rupiah("4,1 juta"), 4100000)
+        self.assertEqual(parse_rupiah("8,3 juta"), 8300000)
+        self.assertIsInstance(parse_rupiah("8,3 juta"), int)
+        self.assertEqual(parse_rupiah("Rp 1.500,50"), 1500.5)
+
     def test_format(self):
         self.assertEqual(format_rupiah(1500000), "Rp 1.500.000")
         self.assertEqual(format_rupiah(-2500), "-Rp 2.500")

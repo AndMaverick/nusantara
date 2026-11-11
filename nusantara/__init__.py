@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from datetime import date
+from decimal import Decimal
 
 __version__ = "0.1.0"
 
@@ -25,13 +26,16 @@ SLANG = {
 WORD = re.compile(r"[A-Za-z]+")
 
 
-def _number(raw: str) -> float:
+def _number(raw: str) -> Decimal:
     raw = raw.strip(".,")
     if "," in raw:
-        return float(raw.replace(".", "").replace(",", "."))
+        raw = raw.replace(".", "").replace(",", ".")
+        if raw.count(".") > 1:
+            raise ValueError(f"not a number: {raw!r}")
+        return Decimal(raw)
     if raw.count(".") > 1 or re.fullmatch(r"\d{1,3}(\.\d{3})+", raw):
-        return float(raw.replace(".", ""))
-    return float(raw)
+        return Decimal(raw.replace(".", ""))
+    return Decimal(raw)
 
 
 def parse_rupiah(text: str):
@@ -40,8 +44,8 @@ def parse_rupiah(text: str):
         number, unit = match.group(1), match.group(2)
         if not unit and not re.search(r"(?i)rp", match.group(0)) and not re.fullmatch(r"\d{1,3}(\.\d{3})+", number):
             continue
-        value = _number(number) * (UNITS[unit.lower()] if unit else 1)
-        return int(value) if value == int(value) else value
+        value = _number(number) * Decimal(UNITS[unit.lower()] if unit else 1)
+        return int(value) if value == int(value) else float(value)
     raise ValueError(f"no rupiah amount found in: {text!r}")
 
 
