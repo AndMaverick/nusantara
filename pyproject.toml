@@ -4,12 +4,30 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nusantara"
-version = "0.1.0"
-description = "Indonesian text and number utilities for AI pipelines: rupiah amounts, chat slang, dates, and +62 phone numbers. Dependency-free Python."
+version = "0.2.0"
+description = "Indonesian text and data infrastructure: rupiah and number words (terbilang), dates and clock times with WIB/WITA/WIT, +62 phone numbers, chat slang, addresses, NIK and NPWP structure. Dependency-free Python."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "AndMaverick LLC" }]
 
+[project.scripts]
+nusantara = "nusantara.cli:main"
+
+[tool.setuptools.package-data]
+nusantara = ["py.typed"]
+
 [tool.setuptools.packages.find]
 include = ["nusantara*"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "C4", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+strict = true
+files = ["nusantara"]
