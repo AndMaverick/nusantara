@@ -96,6 +96,8 @@ python -m unittest discover -s tests -t . -v
 
 94 tests, run on Python 3.10 to 3.13 in CI with ruff and mypy in strict mode.
 
+**Related repositories:** [mao-framework](https://github.com/AndMaverick/mao-framework) has a smaller module, `mao.lingua`, that normalises Arabic and Indonesian text and Gulf and rupiah amounts inside a governed run.
+
 MIT licensed. Built by [AndMaverick LLC](https://www.andmaverick.com).
 
 ---
