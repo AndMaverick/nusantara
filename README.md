@@ -2,16 +2,16 @@
 
 Most AI infrastructure assumes American defaults. In Indonesian text, money is written Rp 1.500.000 or 1,5 juta or 500 rb, chat is full of abbreviations like gak and bgt, dates use Agustus and Des, "setengah tiga" means half past two, and phone numbers appear as 0812, +62 812, or 62812. nusantara reads all of that into clean values before it reaches a model, a database, or a report, and writes values back out the way Indonesians write them. Standard library only, Python 3.10 to 3.13, typed.
 
-It is a companion to [lisan](https://github.com/AndMaverick/lisan), which does the same job for Arabic. If you are building for regional markets and want a second opinion on architecture, you can [start a conversation](https://calendly.com/andmaverick?utm_source=github&utm_medium=repo&utm_campaign=nusantara).
+It is a companion to [lisan](https://github.com/AndMaverick/lisan), which does the same job for Arabic, and to [sovereign.map](https://github.com/AndMaverick/sovereign.map), which checks where the data goes once it has been read.
 
 ## What it does
 
 | Module | Reads | Writes |
 |---|---|---|
-| `money` | `Rp 1.500.000`, `1,5 juta`, `500 rb`, `12 jt`, `IDR 3.000.000`, "seratus ribu rupiah", "setengah juta"; every amount in a text, with positions | `format_rupiah` in full, compact or IDR style, half-up rounding |
+| `money` | `Rp 1.500.000`, `1,5 juta`, `500 rb`, `12 jt`, `IDR 3.000.000`, "seratus ribu rupiah", "setengah juta"; every amount in a text, with positions | `format_rupiah` in full, compact or IDR style, rounding half up |
 | `words` | "seribu dua ratus tiga puluh empat" back to 1234 | `terbilang`, `terbilang_rupiah` (cheque and invoice wording), up to 10^15 - 1 |
 | `dates` | `17 Agustus 2026`, `17 Agu`, `17/08/26`, `2026-08-17`, old spellings (Pebruari, Nopember), weekdays, relative words (besok, lusa, kemarin lusa, 2 minggu lalu), clock times (jam 8 malam, setengah tiga sore), WIB/WITA/WIT | `format_date`, zone conversion, fixed national holidays |
-| `phone` | `0812-3456-7890`, `+62 812 3456 7890`, `62812...`, landlines with area, toll-free, extensions | E.164, national and international formats; operator and area from the prefix |
+| `phone` | `0812-3456-7890`, `+62 812 3456 7890`, `62812...`, landlines with area codes, toll free numbers, extensions | E.164, national and international formats; operator and area from the prefix |
 | `slang` | chat Indonesian: gak, bgt, udh, yg, bagus2 | normalized text, slang density, laughter detection |
 | `address` | `Jl. Sudirman No. 5 RT 03/RW 04, Kel. Menteng, ...` | expanded abbreviations; street, number, RT, RW, kelurahan, kecamatan, city, province (38), postal code |
 | `ids` | NIK (16 digits) and NPWP (15 digits) | structure of a NIK (region, birth date, gender), masking, NPWP formatting |
@@ -57,7 +57,7 @@ python -m nusantara nik 3174011508900001 --mask
 - **Round trips are tested.** `terbilang` and `parse_terbilang` agree on every 7th integer below 200,000 and on random integers up to 10^15. `format_rupiah` and `parse_rupiah` agree on every 997th integer below 5,000,000.
 - **Ambiguity is reported, not guessed.** "jam 12 pagi" raises with the reason. A separator that could be read two ways (`1.500 juta`, `1,500 juta`) is read the Indonesian way and flagged `ambiguous` on the amount. A written weekday that does not match its date sets `weekday_mismatch`. Impossible dates such as 31 Februari are skipped, never rolled over.
 - **Indonesian conventions.** Dots are thousands separators and commas are decimals. Numeric dates are day first. "setengah tiga" is 2:30, half an hour before three. Two digit years use the POSIX pivot (68 and below is 20xx). "jam 12 malam" is midnight, "jam 12 siang" is noon.
-- **Slang is conservative.** A reviewable table of about 160 entries, applied word by word. Words not in it are left untouched, including proper names. Extend it with `extra=` or case-preserving `preserve_case=True`.
+- **Slang is conservative.** A reviewable table of about 160 entries, applied word by word. Words not in it are left untouched, including proper names. Extend it with `extra=`, and keep the writer's capitals with `preserve_case=True`.
 - **Phone numbers converge.** Local, international and bare forms all become +62. Foreign and implausible numbers raise errors with the reason.
 - **Personal data is masked on output.** The CLI never echoes a full NIK: the structure it prints carries the masked number (`317401******0001`), and `--mask` prints only that. The library has `mask_nik` for your own logs.
 - **Old API kept.** Everything from 0.1 still works, and its tests still pass.
@@ -80,8 +80,8 @@ The case lists were written by the author of the parsers alongside the code, so 
 
 ## Honest limits
 
-- **Slang** is a small word-by-word table with no reordering, no context and no regional variants beyond what is listed. A word in the table is always replaced, even where the chat writer meant something else.
-- **Addresses** are pattern based and need their markers (`Jl.`, `Kel.`, `Kec.`, `Kab.`, a postal code). An unmarked city such as "Jakarta Pusat" gives a province but no city. Free-form addresses with no markers return mostly empty fields.
+- **Slang** is a small table applied one word at a time with no reordering, no context and no regional variants beyond what is listed. A word in the table is always replaced, even where the chat writer meant something else.
+- **Addresses** are pattern based and need their markers (`Jl.`, `Kel.`, `Kec.`, `Kab.`, a postal code). An unmarked city such as "Jakarta Pusat" gives a province but no city. Addresses written as free text with no markers return mostly empty fields.
 - **NIK** checks structure only: length, a real birth date, the province code and the female day offset of 40. It does not verify that a person or a number exists. Province codes 92, 93, 95 and 96 are accepted but not named. The century of a two digit birth year is ambiguous and is documented in the code.
 - **Phone operator** comes from the number prefix, which is the original allocation. Number portability means the current carrier can differ.
 - **Holidays**: only fixed national dates are known. Movable holidays (Idul Fitri, Nyepi, Waisak and so on) are not computed.
@@ -100,6 +100,6 @@ MIT licensed. Built by [AndMaverick LLC](https://www.andmaverick.com).
 
 ---
 
-**Related reading:** [The Language They Did Not Build For](https://blog.andmaverick.com/the-language-they-did-not-build-for?utm_source=github&utm_medium=repo&utm_campaign=nusantara)
+**Read the thinking:** [The Language They Did Not Build For](https://blog.andmaverick.com/the-language-they-did-not-build-for?utm_source=github&utm_medium=repo&utm_campaign=nusantara)
 
 **If this is your problem.** If your data, language, or jurisdiction sits outside the assumptions of American AI infrastructure, that is work I do. Let us talk. [Begin a conversation](https://calendly.com/andmaverick?utm_source=github&utm_medium=repo&utm_campaign=nusantara).
